@@ -38,7 +38,9 @@ export const updateProduct = async (req: Request, res: Response) => {
     //   });
     // }
 
-    logger.info(`crm.product.update raw result: ${JSON.stringify(result)}`);
+    logger.info(
+      `crm.product.update raw result: ${JSON.stringify(result.getData())}`,
+    );
 
     return res.status(200).json({
       success: true,
