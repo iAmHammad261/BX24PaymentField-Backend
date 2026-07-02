@@ -9,7 +9,7 @@ import { logger } from "../Utils/logger.js";
 export const getAllProducts = async (req: Request, res: Response) => {
   const client = b24.instance;
   try {
-    const filter = { ">ID": 0 };
+    const filter = { SECTION_ID: 53 };
     const products = await client.actions.v2.callList.make({
       method: "crm.product.list",
       params: {
