@@ -1,15 +1,15 @@
 import { b24 } from "../Auth/bitrix24AuthUtil.js";
-
-const client = b24.instance;
+import type { Request, Response } from "express";
+import { logger } from "../Utils/logger.js";
 
 /**
  * Fetch all CRM products.
  * Uses callList.make to auto-paginate crm.product.list.
  */
-export const getAllProducts = async () => {
+export const getAllProducts = async (req: Request, res: Response) => {
+  const client = b24.instance;
   try {
     const filter = { ">ID": 0 };
-
     const products = await client.actions.v2.callList.make({
       method: "crm.product.list",
       params: {
@@ -22,9 +22,17 @@ export const getAllProducts = async () => {
       requestId: "get-all-products",
     });
 
-    return products;
+    return res.status(200).json({
+      success: true,
+      data: products,
+    });
   } catch (error) {
-    console.error("Bitrix24 getAllProducts error:", error);
-    throw error;
+    logger.error("Bitrix24 getAllProducts error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch products",
+      error: message,
+    });
   }
 };
