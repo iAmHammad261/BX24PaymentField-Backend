@@ -29,8 +29,6 @@ export const updateProduct = async (req: Request, res: Response) => {
       requestId: "update-product-status",
     });
 
-    logger.info(`crm.product.update raw result: ${JSON.stringify(result)}`);
-
     const errors = result?.errors ?? result?.["_errors"] ?? {};
 
     const hasErrors = errors && Object.keys(errors).length > 0;
