@@ -1,5 +1,5 @@
 import express, { type Application } from "express";
-// import { handleAuthCallback } from './Controllers/authController.js';
+import { handleAuthCallback } from "./Controllers/authController.js";
 import { initializeBitrixService } from "./Auth/initializeBitrixService.js";
 import { logger } from "./Utils/logger.js";
 // import { setupRoutes } from './route.js';
@@ -31,7 +31,7 @@ app.get("/", handleAuthCallback);
 
 app.use(express.json());
 
-setupRoutes(app);
+// setupRoutes(app);
 
 app.listen(PORT, async () => {
   logger.info(`Server is running on port ${PORT}`);
