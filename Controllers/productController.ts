@@ -9,7 +9,7 @@ import { logger } from "../Utils/logger.js";
 export const getAllProducts = async (req: Request, res: Response) => {
   const client = b24.instance;
   try {
-    const filter = { SECTION_ID: 53, "!PROPERTY_99": [159, 157, 163] };
+    const filter = { SECTION_ID: 53, "!PROPERTY_99": [null, 159, 157, 163] };
     const products = await client.actions.v2.callList.make({
       method: "crm.product.list",
       params: {
@@ -21,6 +21,13 @@ export const getAllProducts = async (req: Request, res: Response) => {
       idKey: "ID",
       requestId: "get-all-products",
     });
+
+    const filteredProducts = (products.getData() || []).filter(
+      (p: any) =>
+        p.PROPERTY_99 !== null &&
+        p.PROPERTY_99 !== undefined &&
+        p.PROPERTY_99 !== "",
+    );
 
     return res.status(200).json({
       success: true,
