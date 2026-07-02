@@ -29,7 +29,9 @@ export const updateProduct = async (req: Request, res: Response) => {
       requestId: "update-product-status",
     });
 
-    // if () {
+    logger.info(`crm.product.update raw result: ${JSON.stringify(result)}`);
+
+    // if ) {
     //   logger.error("Bitrix24 crm.product.update failed:", result.getErrors());
     //   return res.status(500).json({
     //     success: false,
@@ -37,10 +39,6 @@ export const updateProduct = async (req: Request, res: Response) => {
     //     error: result.getErrors(),
     //   });
     // }
-
-    logger.info(
-      `crm.product.update raw result: ${JSON.stringify(result.getData())}`,
-    );
 
     return res.status(200).json({
       success: true,
