@@ -1,0 +1,21 @@
+{
+  "name": "bx24paymentfield-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@bitrix24/b24jssdk": "^2.0.0",
+    "fs-extra": "^11.3.6",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4"
+  }
+}
