@@ -11,6 +11,8 @@ export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.body;
 
+    logger.debug(`updateProduct called with productId: ${productId}`);
+
     if (!productId) {
       return res.status(400).json({
         success: false,
