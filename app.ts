@@ -8,7 +8,7 @@ import cors from "cors";
 const app: Application = express();
 const PORT: number | string = process.env.PORT || 3000;
 
-const allowedOrigins = ["https://dubai_payment_plan.premierchoiceint.online/"];
+const allowedOrigins = ["https://dubai_payment_plan.premierchoiceint.online"];
 
 app.use(
   cors({
