@@ -31,7 +31,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      data: products,
+      data: filteredProducts,
     });
   } catch (error) {
     logger.error("Bitrix24 getAllProducts error:", error);
