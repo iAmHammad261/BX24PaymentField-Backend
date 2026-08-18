@@ -12,6 +12,7 @@ const allowedOrigins = [
   "https://dubai_payment_plan.premierchoiceint.online",
   "https://dubaipaymentplan.pcirealestate.com",
   "https://dubaibookingform.pcirealestate.com",
+  "https://dubaispaform.pcirealestate.com",
 ];
 
 app.use(
