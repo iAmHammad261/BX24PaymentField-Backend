@@ -2,7 +2,9 @@ import { b24 } from "../Auth/bitrix24AuthUtil.js";
 import type { Request, Response } from "express";
 import { logger } from "../Utils/logger.js";
 
-const AVAILABLE_STATUS_LABEL = "Available";
+// catalog.product.get exposes the PROPERTY_99 status field as
+// property99: { value, valueId } — valueId "155" is the "Available" option.
+const AVAILABLE_PROPERTY_VALUE_ID = "155";
 const REQUIRED_STAGE_NAME = "Sales Booking";
 
 /**
@@ -44,13 +46,13 @@ export const attachProduct = async (req: Request, res: Response) => {
 
     // 1) Load the unit and the deal's current product rows.
     const productResult = await client.actions.v2.call.make({
-      method: "crm.product.get",
+      method: "catalog.product.get",
       params: { id: productId },
       requestId: "attach-product-get",
     });
 
     if (Object.keys(getCallErrors(productResult)).length > 0) {
-      logger.error(`crm.product.get failed: ${JSON.stringify(getCallErrors(productResult))}`);
+      logger.error(`catalog.product.get failed: ${JSON.stringify(getCallErrors(productResult))}`);
       return res.status(500).json({
         success: false,
         message: "Failed to load unit",
@@ -58,7 +60,7 @@ export const attachProduct = async (req: Request, res: Response) => {
       });
     }
 
-    const product: any = productResult.getData();
+    const product: any = (productResult.getData() as any)?.product;
 
     if (!product) {
       return res.status(404).json({
@@ -91,28 +93,9 @@ export const attachProduct = async (req: Request, res: Response) => {
     // (idempotent re-attach shouldn't fail just because a prior attach
     // already moved its status off "Available").
     if (!alreadyAttachedToThisDeal) {
-      const enumResult = await client.actions.v2.call.make({
-        method: "catalog.productPropertyEnum.list",
-        params: { filter: { propertyId: 99 } },
-        requestId: "attach-product-enum-list",
-      });
+      const statusValueId = product.property99?.valueId;
 
-      if (Object.keys(getCallErrors(enumResult)).length > 0) {
-        logger.error(`catalog.productPropertyEnum.list failed: ${JSON.stringify(getCallErrors(enumResult))}`);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to resolve unit status",
-          error: getCallErrors(enumResult),
-        });
-      }
-
-      const statusEnums = extractList(enumResult.getData());
-      const currentStatusEnum = statusEnums.find(
-        (e: any) => String(e.id) === String(product.PROPERTY_99),
-      );
-      const currentStatusLabel = currentStatusEnum?.value;
-
-      if (currentStatusLabel !== AVAILABLE_STATUS_LABEL) {
+      if (String(statusValueId) !== AVAILABLE_PROPERTY_VALUE_ID) {
         return res.status(409).json({
           success: false,
           message: "Unit is no longer available",
