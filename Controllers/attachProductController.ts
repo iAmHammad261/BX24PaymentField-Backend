@@ -21,8 +21,6 @@ const extractList = (data: any): any[] => {
   return [];
 };
 
-const getCallErrors = (result: any) => result?.errors ?? result?.["_errors"] ?? {};
-
 /**
  * Attach a unit (catalog product) to a deal's product rows, server-side,
  * so the availability/stage checks and the write happen in one place
@@ -51,16 +49,16 @@ export const attachProduct = async (req: Request, res: Response) => {
       requestId: "attach-product-get",
     });
 
-    if (Object.keys(getCallErrors(productResult)).length > 0) {
-      logger.error(`catalog.product.get failed: ${JSON.stringify(getCallErrors(productResult))}`);
+    if (!productResult.isSuccess) {
+      logger.error(`catalog.product.get failed: ${productResult.getErrorMessages().join("; ")}`);
       return res.status(500).json({
         success: false,
         message: "Failed to load unit",
-        error: getCallErrors(productResult),
+        error: productResult.getErrorMessages(),
       });
     }
 
-    const product: any = (productResult.getData() as any)?.product;
+    const product: any = (productResult.getData()?.result as any)?.product;
 
     if (!product) {
       return res.status(404).json({
@@ -75,16 +73,16 @@ export const attachProduct = async (req: Request, res: Response) => {
       requestId: "attach-product-rows-get",
     });
 
-    if (Object.keys(getCallErrors(rowsResult)).length > 0) {
-      logger.error(`crm.deal.productrows.get failed: ${JSON.stringify(getCallErrors(rowsResult))}`);
+    if (!rowsResult.isSuccess) {
+      logger.error(`crm.deal.productrows.get failed: ${rowsResult.getErrorMessages().join("; ")}`);
       return res.status(500).json({
         success: false,
         message: "Failed to load deal's product rows",
-        error: getCallErrors(rowsResult),
+        error: rowsResult.getErrorMessages(),
       });
     }
 
-    const currentRows = extractList(rowsResult.getData());
+    const currentRows = extractList(rowsResult.getData()?.result);
     const alreadyAttachedToThisDeal = currentRows.some(
       (row: any) => String(row.PRODUCT_ID) === String(productId),
     );
@@ -110,16 +108,16 @@ export const attachProduct = async (req: Request, res: Response) => {
       requestId: "attach-product-deal-get",
     });
 
-    if (Object.keys(getCallErrors(dealResult)).length > 0) {
-      logger.error(`crm.deal.get failed: ${JSON.stringify(getCallErrors(dealResult))}`);
+    if (!dealResult.isSuccess) {
+      logger.error(`crm.deal.get failed: ${dealResult.getErrorMessages().join("; ")}`);
       return res.status(500).json({
         success: false,
         message: "Failed to load deal",
-        error: getCallErrors(dealResult),
+        error: dealResult.getErrorMessages(),
       });
     }
 
-    const deal: any = dealResult.getData();
+    const deal: any = dealResult.getData()?.result;
 
     if (!deal) {
       return res.status(404).json({
@@ -136,16 +134,16 @@ export const attachProduct = async (req: Request, res: Response) => {
       requestId: "attach-product-stage-list",
     });
 
-    if (Object.keys(getCallErrors(stageListResult)).length > 0) {
-      logger.error(`crm.status.list failed: ${JSON.stringify(getCallErrors(stageListResult))}`);
+    if (!stageListResult.isSuccess) {
+      logger.error(`crm.status.list failed: ${stageListResult.getErrorMessages().join("; ")}`);
       return res.status(500).json({
         success: false,
         message: "Failed to resolve deal stage",
-        error: getCallErrors(stageListResult),
+        error: stageListResult.getErrorMessages(),
       });
     }
 
-    const stages = extractList(stageListResult.getData());
+    const stages = extractList(stageListResult.getData()?.result);
     const currentStage = stages.find((s: any) => s.STATUS_ID === deal.STAGE_ID);
     const currentStageName = currentStage?.NAME;
 
@@ -166,12 +164,12 @@ export const attachProduct = async (req: Request, res: Response) => {
       requestId: "attach-product-rows-set",
     });
 
-    if (Object.keys(getCallErrors(setResult)).length > 0) {
-      logger.error(`crm.deal.productrows.set failed: ${JSON.stringify(getCallErrors(setResult))}`);
+    if (!setResult.isSuccess) {
+      logger.error(`crm.deal.productrows.set failed: ${setResult.getErrorMessages().join("; ")}`);
       return res.status(500).json({
         success: false,
         message: "Failed to attach unit to deal",
-        error: getCallErrors(setResult),
+        error: setResult.getErrorMessages(),
       });
     }
 
