@@ -33,7 +33,9 @@ app.use(
 
 app.get("/", handleAuthCallback);
 
-app.use(express.json());
+// express.json() defaults to a 100kb body limit — too small for base64-encoded
+// file uploads (e.g. payment-proof PDFs) going through /updateDeal.
+app.use(express.json({ limit: "25mb" }));
 
 setupRoutes(app);
 
