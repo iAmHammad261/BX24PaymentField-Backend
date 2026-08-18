@@ -3,7 +3,8 @@ import type { Request, Response } from "express";
 import { logger } from "../Utils/logger.js";
 
 // catalog.product.get exposes the PROPERTY_99 status field as
-// property99: { value, valueId } — valueId "155" is the "Available" option.
+// property99: { value, valueEnum, valueId } — `value` is the enum option id
+// ("155" = Available), `valueId` is just this binding row's own id.
 const AVAILABLE_PROPERTY_VALUE_ID = "155";
 const REQUIRED_STAGE_NAME = "Sales Booking";
 
@@ -95,7 +96,7 @@ export const attachProduct = async (req: Request, res: Response) => {
     // (idempotent re-attach shouldn't fail just because a prior attach
     // already moved its status off "Available").
     if (!alreadyAttachedToThisDeal) {
-      const statusValueId = product.property99?.valueId;
+      const statusValueId = product.property99?.value;
 
       logger.info(`attachProduct: product.property99: ${JSON.stringify(product.property99)}, statusValueId: ${statusValueId}, expected: ${AVAILABLE_PROPERTY_VALUE_ID}`);
 
