@@ -60,6 +60,8 @@ export const attachProduct = async (req: Request, res: Response) => {
 
     const product: any = (productResult.getData()?.result as any)?.product;
 
+    logger.info(`attachProduct: catalog.product.get raw result: ${JSON.stringify(productResult.getData()?.result)}`);
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -87,11 +89,15 @@ export const attachProduct = async (req: Request, res: Response) => {
       (row: any) => String(row.PRODUCT_ID) === String(productId),
     );
 
+    logger.info(`attachProduct: currentRows: ${JSON.stringify(currentRows)}, alreadyAttachedToThisDeal: ${alreadyAttachedToThisDeal}`);
+
     // 2) Re-check availability, unless the unit is already on this deal
     // (idempotent re-attach shouldn't fail just because a prior attach
     // already moved its status off "Available").
     if (!alreadyAttachedToThisDeal) {
       const statusValueId = product.property99?.valueId;
+
+      logger.info(`attachProduct: product.property99: ${JSON.stringify(product.property99)}, statusValueId: ${statusValueId}, expected: ${AVAILABLE_PROPERTY_VALUE_ID}`);
 
       if (String(statusValueId) !== AVAILABLE_PROPERTY_VALUE_ID) {
         return res.status(409).json({
@@ -146,6 +152,8 @@ export const attachProduct = async (req: Request, res: Response) => {
     const stages = extractList(stageListResult.getData()?.result);
     const currentStage = stages.find((s: any) => s.STATUS_ID === deal.STAGE_ID);
     const currentStageName = currentStage?.NAME;
+
+    logger.info(`attachProduct: deal.STAGE_ID: ${deal.STAGE_ID}, categoryId: ${categoryId}, stages: ${JSON.stringify(stages)}, currentStageName: ${currentStageName}`);
 
     if (currentStageName !== REQUIRED_STAGE_NAME) {
       return res.status(409).json({
