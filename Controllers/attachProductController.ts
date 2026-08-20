@@ -6,7 +6,7 @@ import { logger } from "../Utils/logger.js";
 // property99: { value, valueEnum, valueId } — `value` is the enum option id
 // ("155" = Available), `valueId` is just this binding row's own id.
 const AVAILABLE_PROPERTY_VALUE_ID = "155";
-const REQUIRED_STAGE_NAME = "Sales Booking";
+const ALLOWED_STAGE_NAMES = ["Sales Booking", "Sales Proposal"];
 
 /**
  * Bitrix wraps list results under varying keys depending on the API
@@ -108,7 +108,7 @@ export const attachProduct = async (req: Request, res: Response) => {
       }
     }
 
-    // 3) Confirm the deal is at the "Sales Booking" stage.
+    // 3) Confirm the deal is at one of the allowed stages.
     const dealResult = await client.actions.v2.call.make({
       method: "crm.deal.get",
       params: { id: dealId },
@@ -156,10 +156,14 @@ export const attachProduct = async (req: Request, res: Response) => {
 
     logger.info(`attachProduct: deal.STAGE_ID: ${deal.STAGE_ID}, categoryId: ${categoryId}, stages: ${JSON.stringify(stages)}, currentStageName: ${currentStageName}`);
 
-    if (currentStageName !== REQUIRED_STAGE_NAME) {
+    const isAllowedStage = ALLOWED_STAGE_NAMES.some(
+      (name) => name.toLowerCase() === String(currentStageName).toLowerCase(),
+    );
+
+    if (!isAllowedStage) {
       return res.status(409).json({
         success: false,
-        message: "Deal is not at Sales Booking stage",
+        message: `Deal is not at ${ALLOWED_STAGE_NAMES.join(" or ")} stage`,
       });
     }
 
